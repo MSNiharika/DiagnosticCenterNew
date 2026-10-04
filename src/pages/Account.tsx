@@ -7,6 +7,7 @@ import { seedOrders } from "../data/ops"
 import { FLOW } from "../data/types"
 import type { Gender, Order, OrderStatus } from "../data/types"
 import { explainFlag } from "../data/voice"
+import { downloadReportPdf } from "../lib/reportPdf"
 import { digits, inr, phonePretty } from "../lib/utils"
 import { Button, ButtonLink, Field, Page, useTitle } from "../components/ui"
 
@@ -232,7 +233,7 @@ export function Reports() {
     <Page>
       <p className="kicker">Reports</p>
       <h1>Hello, {session.name.split(" ")[0]}.</h1>
-      <p className="lead">Bookings on {phonePretty(session.phone)}. Numbers stay hidden until a doctor releases the report. The sample letter is there so you can see a finished one.</p>
+      <p className="lead">Bookings on {phonePretty(session.phone)}. Numbers stay hidden until a doctor releases the report. Open a sample, then download it as a PDF.</p>
       <div className="chips" style={{ marginTop: 12 }}>
         {list.map((order) => (
           <button key={order.id} type="button" className={`chip ${match?.id === order.id ? "on" : ""}`} onClick={() => setPicked(order.id)}>
@@ -276,57 +277,73 @@ function ReportBody({ order }: { order: Order }) {
 }
 
 function StageSample({ order, stage }: { order: Order; stage: OrderStatus }) {
+  return (
+    <div className="stage-sample">
+      <div className="stage-head">
+        <h2>{stageTitle(stage)}</h2>
+        <Button type="button" variant="ghost" onClick={() => downloadReportPdf(order, stage)}>Download PDF</Button>
+      </div>
+      <StageCopy order={order} stage={stage} />
+    </div>
+  )
+}
+
+function stageTitle(stage: OrderStatus) {
+  if (stage === "Booked") return "Sample booking slip"
+  if (stage === "Collected") return "Sample collection note"
+  if (stage === "Accessioned") return "Sample accession sheet"
+  if (stage === "Processing") return "Sample worksheet"
+  if (stage === "Review") return "Sample review copy"
+  return "Signed report"
+}
+
+function StageCopy({ order, stage }: { order: Order; stage: OrderStatus }) {
   const names = order.items.map((item) => item.name).join(", ")
   if (stage === "Booked") {
     return (
-      <div className="stage-sample">
-        <h2>Sample booking slip</h2>
+      <>
         <p>This is the slip from the moment the visit was booked. No blood has been drawn, so there is nothing to read.</p>
         <p>{order.slot} · {order.mode}{order.address ? ` · ${order.address}` : ""}</p>
         <p>{names}</p>
         <p className="muted">{order.paid ? "Paid" : "Pay at the centre"} · {order.priority}</p>
-      </div>
+      </>
     )
   }
   if (stage === "Collected") {
     return (
-      <div className="stage-sample">
-        <h2>Sample collection note</h2>
+      <>
         <p>The tubes are labelled {order.id} and still with the collector. The analyser has not seen them.</p>
         <ul>
           {order.items.map((item) => <li key={item.name}>{item.name} — in the bag</li>)}
         </ul>
         {order.address && <p className="muted">Drawn at {order.address}.</p>}
-      </div>
+      </>
     )
   }
   if (stage === "Accessioned") {
     return (
-      <div className="stage-sample">
-        <h2>Sample accession sheet</h2>
+      <>
         <p>{order.id} is on the rack in {order.department}. Work has not started, so every line is still blank.</p>
         <ul>
           {order.items.map((item) => <li key={item.name}>{item.name} — on the rack</li>)}
         </ul>
         {order.note && <p className="muted">Bench note: {order.note}</p>}
-      </div>
+      </>
     )
   }
   if (stage === "Processing") {
     const firstGroup = order.results[0]?.group
     return (
-      <div className="stage-sample">
-        <h2>Sample worksheet</h2>
+      <>
         <p>The first panel has numbers. The rest are still running. A doctor has not seen this page.</p>
         <ResultTable order={order} running={(row) => row.group !== firstGroup || !row.value} />
-      </div>
+      </>
     )
   }
   if (stage === "Review") {
     const flags = order.results.filter((row) => row.flag && row.value)
     return (
-      <div className="stage-sample">
-        <h2>Sample review copy</h2>
+      <>
         <p>Every value is typed. {order.authorisedBy ?? "The duty doctor"} has not signed, so this is not a report you can keep.</p>
         {order.results.filter((row) => row.value).map((row) => (
           <p key={row.name}>{explainFlag(row.name, row.flag)}</p>
@@ -334,13 +351,12 @@ function StageSample({ order, stage }: { order: Order; stage: OrderStatus }) {
         <p className="muted">{flags.length === 0 ? "Nothing on this sheet sits outside the reference range." : `${flags.length} value${flags.length === 1 ? "" : "s"} sit outside the range. They stay in the lab until the signature.`}</p>
         <ResultTable order={order} running={(row) => !row.value} />
         <p>Unsigned. Waiting for a signature.</p>
-      </div>
+      </>
     )
   }
   const flags = order.results.filter((row) => row.flag && row.value)
   return (
-    <div className="stage-sample">
-      <h2>Signed report</h2>
+    <>
       {order.results.filter((row) => row.value).map((row) => (
         <p key={row.name}>{explainFlag(row.name, row.flag)}</p>
       ))}
@@ -348,7 +364,7 @@ function StageSample({ order, stage }: { order: Order; stage: OrderStatus }) {
       <ResultTable order={order} running={() => false} />
       {order.note && <p>Note: {order.note}</p>}
       <p>Signed by {order.authorisedBy ?? "the duty doctor"}.</p>
-    </div>
+    </>
   )
 }
 

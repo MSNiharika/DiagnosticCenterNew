@@ -1270,7 +1270,9 @@ h2 { font-size: 1.45rem; margin: 0; }
 .chip.on { background: var(--deep); color: #fff; border-color: var(--deep); }
 .chip.viewing { box-shadow: 0 0 0 2px var(--gold); }
 .stage-sample { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
-.stage-sample h2 { margin-bottom: 8px; }
+.stage-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.stage-head h2 { margin: 0; }
+.stage-head .ghost { padding: 8px 14px; }
 .stage-sample ul { margin: 8px 0; padding-left: 18px; }
 .stage-sample li { margin: 4px 0; }
 .pill {
@@ -1371,7 +1373,7 @@ a.card:hover, article.card:hover, .door:hover, .pack:hover, .test-card:hover, .b
   .help-side { padding-bottom: 20px; }
   .help-mark { width: 140px; }
   .doors, .test-grid, .pack-grid, .catalogue, .menu-grid, .banner, .foot-grid, .line, .offer-facts, .offer-grid { grid-template-columns: 1fr; }
-  .menu-show { flex-direction: column; align-items: stretch; }
+  .menu-show, .stage-head { flex-direction: column; align-items: stretch; }
   .cat-row { grid-auto-columns: calc((100% - 24px) / 3); }
   .offer-stick > div { flex-wrap: wrap; }
   .offer-count { flex-direction: column; }
