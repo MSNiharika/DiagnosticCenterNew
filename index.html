@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" data-atmosphere="aurora">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      try {
+        var atmosphere = localStorage.getItem("lumen-atmosphere")
+        if (atmosphere === "dawn" || atmosphere === "glacier" || atmosphere === "aurora") {
+          document.documentElement.dataset.atmosphere = atmosphere
+        }
+      } catch (error) {}
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Aurora Diagnostics in Yanam. Book blood tests, checkups, scans, and home collection. A clearer desk for the same menu."
+    />
+    <meta name="theme-color" content="#0e3c43" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Aurora Lumen</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
